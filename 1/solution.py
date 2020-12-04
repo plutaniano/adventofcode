@@ -14,6 +14,4 @@ for i, n in enumerate(l):
                 solution2 = n*m*o
 
 print(f'Part 2: {solution2}')
-        
-
 
