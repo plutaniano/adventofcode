@@ -4,20 +4,11 @@ with open('input.txt') as f:
     txt = [i for i in f.read().splitlines()]
 
 def solution_1(txt):
-    gamma = []
-    for bit in range(len(txt[0])):
-        bits = [line[bit] for line in txt]
-        counter = Counter(bits)
-        gamma.append(counter.most_common()[0][0])
+    bits = [[int(n[i]) for n in txt] for i in range(len(txt[0]))]
+    most_common_bit = [int(sum(l) > len(txt)/2) for l in bits]
+    n = int(''.join(map(str, most_common_bit)))
+    return n * ((2 ** len(txt[0]) -1) - n)
 
-    gamma = ''.join(gamma)
-    epsilon = gamma.replace('1', '-').replace('0', '1').replace('-', '0')
-    epsilon = ''.join(epsilon)
-
-    gamma = int(gamma, 2)
-    epsilon = int(epsilon, 2)
-
-    return gamma * epsilon
 
 print(f'Part 1: {solution_1(txt)}')
 #print(f'Part 2: {solution_2(txt)}')
