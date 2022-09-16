@@ -1,71 +1,66 @@
-l = open("input.txt").read().split("\n")
-del l[-1]
+from aoc import Solution
+from collections import Counter, defaultdict
 
 
 class Bag:
-    all = []
+    all = defaultdict(dict)
 
-    def __init__(self, type, color):
-        Bag.all.append(self)
-        self.type = type
+    def __new__(cls, kind, color):
+        if cls.all[kind].get(color):
+            return cls.all[kind][color]
+        new = super().__new__(cls)
+        cls.all[kind][color] = new
+        return new
+
+    def __init__(self, kind, color):
+        self.kind = kind
         self.color = color
-        self.contain = []
+        self.inside = Counter()
 
-    def add_contain(self, bag, qnty):
-        self.contain.append((bag, qnty))
+    def __iter__(self):
+        return self.inside.items()
 
-    @classmethod
-    def get_bag(cls, type, color):
-        for bag in Bag.all:
-            if bag.type == type and bag.color == color:
-                return bag
-        return Bag(type, color)
+    def __contains__(self, other_bag):
+        if self.is_empty():
+            return False
+        return any([other_bag in bag for bag in self])
+
+    def is_empty(self):
+        return bool(self.inside)
+
+    def put_inside(self, n, kind, color):
+        bag = Bag(kind, color)
+        self.inside[bag] += n
 
     def bags_inside(self):
-        if not self.contain:
-            return 0
-        else:
-            # print(f'{self} contains {",".join([i[0].__repr__() for i in self.contain])}.')
-            return sum([i[1] + i[0].bags_inside() * i[1] for i in self.contain])
+        total = 0
+        for bag, n in self:
+            total += n + bag.bags_inside() * n
+        return total
 
-    def is_inside(self, type, color):
-        for i in self.contain:
-            if i[0].type == type and i[0].color == color:
-                return True
-
-        return any([i[0].is_inside(type, color) for i in self.contain])
-
-    def __repr__(self):
-        return f"[bag] <{self.type} {self.color}>"
+    def __repr__(self) -> str:
+        return f"Bag('{self.kind}', '{self.color}')"
 
 
-def parse_line(line):
-    line = line.split(" contain ")
-    main = line[0].split()
+class Day07(Solution):
+    date = 2020, 7
 
-    if "no other" not in line[1]:
-        contain = line[1].replace(".", "").split(", ")
-        contain = [i.split() for i in contain]
-    else:
-        contain = []
+    def parse(self, raw_data):
+        for line in raw_data.splitlines():
+            outside, inside = line.split(" contain ")
+            kind, color, _ = outside.split()
+            outside = Bag(kind, color)
+            if inside == "no other bags.":
+                continue
+            else:
+                for bag in inside.split(","):
+                    n, kind, color, _ = bag.split()
+                    outside.put_inside(int(n), kind, color)
+        return Bag.all
 
-    d = {
-        "main_color": main[1],
-        "main_type": main[0],
-        "contain_qnty": [int(i[0]) for i in contain],
-        "contain_type": [i[1] for i in contain],
-        "contain_color": [i[2] for i in contain],
-    }
-    return d
+    def part_one(self, bags):
+        shiny_gold = Bag("shiny", "gold")
+        return sum([shiny_gold in bag for bag in bags])
 
-
-for line in l:
-    d = parse_line(line)
-    bag = Bag.get_bag(d["main_type"], d["main_color"])
-
-    for i, qnty in enumerate(d["contain_qnty"]):
-        bag.add_contain(Bag.get_bag(d["contain_type"][i], d["contain_color"][i]), qnty)
-
-
-print(f"Part 1: {sum([i.is_inside('shiny', 'gold') for i in Bag.all])}")
-print(f"Part 2: {Bag.get_bag('shiny', 'gold').bags_inside()}")
+    def part_two(self, _):
+        return Bag("shiny", "gold").bags_inside()
