@@ -16,7 +16,7 @@ class SolutionMeta(type):
         return new
 
 
-class SolutionBase(metaclass=SolutionMeta):
+class SolutionBase:
     def __init__(self):
         self.year, self.day = self.date
         self.raw_data = get_data(year=self.year, day=self.day)
