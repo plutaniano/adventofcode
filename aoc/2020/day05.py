@@ -1,25 +1,25 @@
-l = open("input.txt").read().split()
+from aoc import Solution
 
 
-def seat_id(s):
-    d = {"B": "1", "F": "0", "R": "1", "L": "0"}
+class Day05(Solution):
+    date = 2020, 5
+    table = {"B": "1", "F": "0", "R": "1", "L": "0"}
 
-    for i in d.keys():
-        s = s.replace(i, d[i])
+    def parse(self, raw_data):
+        return raw_data.splitlines()
 
-    row = int(s[:-3], 2)
-    col = int(s[-3:], 2)
+    def seat_id(self, seat):
+        for letter in seat:
+            seat.replace(letter, self.table[letter])
+        row = int(seat[:-3], 2)
+        col = int(seat[-3:], 2)
+        return row * 8 + col
 
-    return row * 8 + col
+    def part_one(self, seats):
+        return max([self.seat_id(seat) for seat in seats])
 
-
-ids = sorted([seat_id(i) for i in l])
-solution1 = max(ids)
-
-for i, n in enumerate(ids):
-    if ids[i] != ids[i + 1] - 1:
-        solution2 = ids[i] + 1
-        break
-
-print(f"Part 1: {solution1}")
-print(f"Part 2: {solution2}")
+    def part_two(self, seats):
+        ids = sorted([self.seat_id(seat) for seat in seats])
+        for i, seat in enumerate(ids):
+            if ids[i + 1] != seat + 1:
+                return seat + 1

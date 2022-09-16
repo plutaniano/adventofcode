@@ -1,42 +1,57 @@
-f = open("input.txt").read().replace("\n", " ").split("  ")
+import re
+from aoc import Solution
 
-fields = {
-    "byr": lambda yr: 1920 <= int(yr) <= 2002,
-    "iyr": lambda yr: 2010 <= int(yr) <= 2020,
-    "eyr": lambda yr: 2020 <= int(yr) <= 2030,
-    "hgt": lambda s: 150 <= int(s[:-2]) <= 193
-    if s[-2:] == "cm"
-    else 59 <= int(s[:-2]) <= 76
-    if s[-2:] == "in"
-    else False,
-    "hcl": lambda hcl: all([i in "0123456789abcdefABCDEF" for i in hcl[1:]])
-    if hcl[0] == "#"
-    else False,
-    "ecl": lambda ecl: ecl in ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"],
-    "pid": lambda n: n.isnumeric() and len(n) == 9,
-}
 
-solution1 = 0
-solution2 = 0
+class Day04(Solution):
+    date = 2020, 4
 
-for pp in f:
-    fail = False
-    for field in fields.keys():
-        if field + ":" not in pp:
-            fail = True
-            break
-    if not fail:
-        solution1 += 1
-        pp = pp.split()
-        for item in pp:
-            if item[:3] == "cid":
-                continue
-            func = fields[item[:3]]
-            if not func(item[4:]):
-                fail = True
-                break
-        if not fail:
-            solution2 += 1
+    def parse(self, raw_data):
+        passports = []
+        for block in raw_data.split("\n\n"):
+            passport = {}
+            for pair in block.replace("\n", " ").split():
+                field, value = pair.split(":")
+                print(pair)
+                match field:
+                    case "byr" | "iyr" | "eyr":
+                        value = int(value)
+                    case "cid":
+                        continue  # discard cid
+                    case "hcl" | "ecl" | "pid" | "hgt":
+                        pass
+                passport[field] = value
+        return passports
 
-print(f"Part 1: {solution1}")
-print(f"Part 2: {solution2}")
+    def check_passport(self, passport):
+        return len(passport) == 7 and all([self.check_field(k, v) for k, v in passport])
+
+    def check_field(self, field, value):
+        match field:
+            case "byr":
+                return 1920 <= value <= 2002
+            case "iyr":
+                return 2010 <= value <= 2020
+            case "eyr":
+                return 2020 <= value <= 2030
+            case "hgt":
+                match re.match(r"([0-9]+)([A-z]*)"):
+                    case (n, "cm"):
+                        return 150 <= n <= 193
+                    case (n, "in"):
+                        return 59 <= n <= 76
+                    case _:
+                        return False
+            case "hcl":
+                return bool(re.match(r"^#[0-9a-fA-F]+$", value))
+            case "ecl":
+                return value in ("amb", "blu", "brn", "gry", "grn", "hzl", "oth")
+            case "pid":
+                return value.isnumeric() and len(value) == 9
+            case _:
+                return False
+
+    def part_one(self, passports):
+        return sum([len(p) == 7 for p in passports])  # seven required fields
+
+    def part_two(self, passports):
+        return sum([self.check_passport(p) for p in passports])
