@@ -1,90 +1,92 @@
-from math import *
-
-l = open("input.txt").readlines()
-l = [(i[0], int(i[1:])) for i in l]
+from aoc import Solution
 
 
 class Ship:
-    def __init__(self, waypoint=False):
-        self.dir = complex(1, 0)
+    def __init__(self):
+        self.direction = complex(1, 0)
         self.position = complex(0, 0)
 
-    def N(self, steps):
-        self.position += steps * complex(0, 1)
+    def manhattan_distance(self):
+        return abs(self.position.imag) + abs(self.position.real)
 
-    def S(self, steps):
-        self.position += steps * complex(0, -1)
+    def move(self, direction, units):
+        return getattr(self, f"move_{direction}")(units)
 
-    def E(self, steps):
-        self.position += steps * complex(1, 0)
+    def move_N(self, units):
+        self.position += units * complex(0, 1)
 
-    def W(self, steps):
-        self.position += steps * complex(-1, 0)
+    def move_S(self, units):
+        self.position += units * complex(0, -1)
 
-    def F(self, steps):
-        self.position += steps * self.dir
+    def move_E(self, units):
+        self.position += units * complex(1, 0)
 
-    def R(self, angle):
-        angle = angle // 90
-        angle = angle % 4
-        for i in range(angle):
-            self.dir *= complex(0, -1)
+    def move_W(self, units):
+        self.position += units * complex(-1, 0)
 
-    def L(self, angle):
-        angle = angle // 90
-        angle = angle % 4
-        for i in range(angle):
-            self.dir *= complex(0, 1)
+    def move_F(self, units):
+        self.position += units * self.direction
 
+    def move_R(self, units):
+        angle = (units // 90) % 4
+        for _ in range(angle):
+            self.direction *= complex(0, -1)
 
-s = Ship()
-for i in l:
-    method = getattr(s, i[0])
-    method(i[1])
-
-solution1 = int(abs(s.position.imag) + abs(s.position.real))
+    def move_L(self, units):
+        angle = (units // 90) % 4
+        for _ in range(angle):
+            self.direction *= complex(0, 1)
 
 
-class WaypointShip:
-    def __init__(self, waypoint: complex):
-        self.dir = complex(1, 0)
-        self.position = complex(0, 0)
+class WaypointShip(Ship):
+    def __init__(self, waypoint):
+        super().__init__()
         self.waypoint = waypoint
 
-    def N(self, steps):
-        self.waypoint += steps * complex(0, 1)
+    def move_N(self, units):
+        self.waypoint += units * complex(0, 1)
 
-    def S(self, steps):
-        self.waypoint += steps * complex(0, -1)
+    def move_S(self, units):
+        self.waypoint += units * complex(0, -1)
 
-    def E(self, steps):
-        self.waypoint += steps * complex(1, 0)
+    def move_W(self, units):
+        self.waypoint += units * complex(1, 0)
 
-    def W(self, steps):
-        self.waypoint += steps * complex(-1, 0)
+    def move_E(self, units):
+        self.waypoint += units * complex(-1, 0)
 
-    def F(self, steps):
-        self.position += steps * self.waypoint
+    def move_F(self, units):
+        self.position += units * self.waypoint
 
-    def R(self, angle):
-        angle = angle // 90
-        angle = angle % 4
-        for i in range(angle):
+    def move_R(self, angle):
+        angle = (angle // 90) % 4
+        for _ in range(angle):
             self.waypoint *= complex(0, -1)
 
-    def L(self, angle):
-        angle = angle // 90
-        angle = angle % 4
-        for i in range(angle):
+    def move_L(self, angle):
+        angle = (angle // 90) % 4
+        for _ in range(angle):
             self.waypoint *= complex(0, 1)
 
 
-ws = WaypointShip(complex(10, 1))
-for i in l:
-    method = getattr(ws, i[0])
-    method(i[1])
+class Day12(Solution):
+    date = 2020, 12
 
-solution2 = int(abs(ws.position.imag) + abs(ws.position.real))
+    def parse(self, raw_data):
+        data = []
+        for line in raw_data.splitlines():
+            direction, units = line[:1], line[1:]
+            data.append((direction, int(units)))
+        return data
 
-print(f"Part 1: {solution1}")
-print(f"Part 2: {solution2}")
+    def part_one(self, moves):
+        s = Ship()
+        for dir, units in moves:
+            s.move(dir, units)
+        return s.manhattan_distance()
+
+    def part_two(self, moves):
+        s = WaypointShip(waypoint=complex(10, 1))
+        for dir, units in moves:
+            s.move(dir, units)
+        return s.manhattan_distance()
