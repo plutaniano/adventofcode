@@ -1,21 +1,20 @@
-import os
+from functools import reduce
+from aoc import Solution
 
-l = open("./input.txt").read().split("\n\n")
-l[-1] = l[-1][:-1]
-solution1 = 0
-solution2 = 0
 
-for group in l:
-    people = group.count("\n") + 1
-    s = set(list(group))
-    try:
-        s.remove("\n")
-    except:
-        pass
-    solution1 += len(s)
-    for letter in s:
-        if group.count(letter) == people:
-            solution2 += 1
+class Day06(Solution):
+    date = 2020, 6
 
-print(f"Part 1: {solution1}")
-print(f"Part 2: {solution2}")
+    def parse(self, raw_data):
+        return [group.splitlines() for group in raw_data.split("\n\n")]
+
+    def part_one(self, groups):
+        unique_letters = [set("".join(group)) for group in groups]
+        return sum([len(letters) for letters in unique_letters])
+
+    def part_two(self, groups):
+        common_letters = [reduce(lambda a, b: {*a} & {*b}, group) for group in groups]
+        return sum([len(letters) for letters in common_letters])
+
+
+Day06().submit()
