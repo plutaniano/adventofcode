@@ -1,67 +1,46 @@
-l = open("input.txt").read().split("\n")
-del l[-1]
-
-for i, n in enumerate(l):
-    opcode, operand = n.split()
-    l[i] = [opcode, int(operand)]
-
-acc = 0
-nip = 0
-executed = []
-
-while nip not in executed:
-    executed.append(nip)
-    if l[nip][0] == "acc":
-        acc += l[nip][1]
-        nip += 1
-
-    elif l[nip][0] == "nop":
-        nip += 1
-
-    elif l[nip][0] == "jmp":
-        nip += l[nip][1]
-
-print(f"Part 1: {acc}")
-
-acc = 0
-nip = 0
+from enum import Enum
+from aoc import Solution
 
 
-def run(c):
-    program = l[:]
-    acc = 0
-    nip = 0
-    executed = []
-    nop_jmp_counter = 0
+class Day08(Solution):
+    date = 2020, 8
 
-    while nip not in executed:
-        if nip >= len(program):
-            break
-        executed.append(nip)
+    def parse(self, raw_data):
+        data = []
+        for line in raw_data.splitlines():
+            opcode, operand = line.split()
+            data.append([opcode, operand])
+        return data
 
-        if program[nip][0] == "acc":
-            acc += program[nip][1]
-            nip += 1
+    def execute(self, program):
+        pc = 0  # program counter
+        accumulator = 0
+        executed = set()
+        while pc not in executed or pc >= len(program):
+            executed.add(pc)
+            match program[pc]:
+                case "acc", v:
+                    accumulator += int(v)
+                    pc += 1
+                case "jmp", v:
+                    pc += int(v)
+                case "nop":
+                    pc += 1
+        return accumulator, pc not in executed
 
-        elif program[nip][0] == "nop":
-            if nop_jmp_counter + 1 == c:
-                nip += program[nip][1]
-            else:
-                nip += 1
-            nop_jmp_counter += 1
+    def part_one(self, program):
+        accumulator, _ = self.execute(program)
+        return accumulator
 
-        elif program[nip][0] == "jmp":
-            if nop_jmp_counter + 1 == c:
-                nip += 1
-            else:
-                nip += program[nip][1]
-            nop_jmp_counter += 1
-
-    if nip == len(l):
-        print(f"Part 2: {acc}")
-    else:
-        pass
-
-
-for i in range(1000):
-    run(i)
+    def part_two(self, program):
+        for nop_jmp in range(len(program)):
+            nop_jmp_counter = 0
+            modified_program = program.copy()
+            for i, (opcode, _) in enumerate(program):
+                if opcode in ["nop", "jmp"]:
+                    nop_jmp_counter += 1
+                if nop_jmp == nop_jmp_counter:
+                    modified_program[i][0] = "jmp" if opcode == "nop" else "nop"
+                acc, terminated = self.execute(modified_program)
+                if terminated:
+                    return acc
