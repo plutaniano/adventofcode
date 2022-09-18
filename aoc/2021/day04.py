@@ -63,7 +63,7 @@ class Board:
 
     def __repr__(self):
         rows = "\n\t".join([str(row) for row in self.rows])
-        return f"Board,{self.won}([\n\t{rows}\n])"
+        return f"Board([\n\t{rows}\n])"
 
 
 class Day04:
