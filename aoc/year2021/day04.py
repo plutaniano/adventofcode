@@ -11,8 +11,7 @@ class Number:
     def __eq__(self, other):
         if isinstance(other, Number):
             return self.value == other.value
-        else:
-            return self.value == other
+        return self.value == other
 
     def __bool__(self):
         return self.played
@@ -66,7 +65,7 @@ class Board:
         return f"Board,{self.won}([\n\t{rows}\n])"
 
 
-class Day04:
+class Day04(Solution):
     date = 2021, 4
 
     def parse(self, raw_data):

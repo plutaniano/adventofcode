@@ -32,15 +32,13 @@ class SolutionBase:
         raise NotImplemented
 
     def solve(self):
+        self.parsed_data = self.parse(self.raw_data)
         one = self.part_one(self.parsed_data)
         two = self.part_two(self.parsed_data)
         return one, two
 
     def submit(self):
-        one, two = self.solve()
-        # implement actual check
-        print(one, two)
-        return False, False
+        pass
 
     def __repr__(self):
         return f"<Solution: year={self.year}, day={self.day}>"
