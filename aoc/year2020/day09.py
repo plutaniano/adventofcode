@@ -1,7 +1,10 @@
-l = open("input.txt").read().split("\n")
-del l[-1]
-l = list(map(int, l))
+from aoc import Solution
 
+class Day09(Solution):
+    date = 2020, 9
+
+    def parse(self, raw_data):
+        return [int(i) for i in raw_data.splitlines()]
 
 class Day9:
     def __init__(self, first25):

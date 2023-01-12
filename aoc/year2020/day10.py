@@ -1,13 +1,15 @@
-from collections import defaultdict
+from aoc import Solution
 
-inp = open("input.txt").read().split()
-inp = list(map(int, inp))
-inp.append(0)
-inp.sort()
-inp.append(inp[-1] + 3)
+class Day10(Solution):
+    date = 2020, 10
 
-diffs = [inp[i + 1] - inp[i] for i in range(len(inp[:-1]))]
-solution1 = diffs.count(1) * diffs.count(3)
+    def parse(self, raw_data):
+        return sorted([int(i) for i in raw_data.split()])
+    
+    def part_one(self, parsed_data):
+        data = [0] + parsed_data
+        diffs = [data[i + 1] - data[i] for i in range(len(data[:-1]))]
+        return diffs.count(1) * diffs.count(3)
 
 options = []
 for i in range(len(inp)):
